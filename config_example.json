@@ -1,0 +1,16 @@
+{
+	"RedisDB":{
+		"Host": "localhost",
+		"Port": "6379",
+		"Pass": ""
+	},
+
+	"TelegramBot":{
+		"Token": ""
+	},
+
+	"CRBot":{
+		"PassToken": "",
+		"PlayerTag": ""
+	}
+}

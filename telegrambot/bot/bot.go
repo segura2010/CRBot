@@ -4,6 +4,7 @@ package bot
 import (
     "time"
     "fmt"
+    "strings"
     
     "github.com/tucnak/telebot"
 
@@ -18,11 +19,11 @@ type TelegramBot struct{
 
 var instance *TelegramBot = nil
 
-func CreateInstance(token, name string) *TelegramBot {
-    instance = &TelegramBot{Token:token, Name:name, Started:false}
+func CreateInstance(token string) *TelegramBot {
+    instance = &TelegramBot{Token:token, Started:false}
     bot, err := telebot.NewBot(token)
     if err != nil {
-        return nil
+        panic(err)
     }
 
     instance.Started = true
@@ -37,7 +38,7 @@ func GetInstance() *TelegramBot {
 }
 
 func RefreshSession(){
-    CreateInstance(instance.Token, instance.Name)
+    CreateInstance(instance.Token)
 }
 
 
@@ -47,9 +48,14 @@ func listenMessages(){
     myBot.Bot.Listen(messages, 1*time.Second)
 
     for message := range messages {
-        userID := fmt.Sprintf("%d", message.Sender.ID)
+        //userID := fmt.Sprintf("%d", message.Sender.ID)
         
-        if message.Text == "/get" {
+        if strings.Index(message.Text, "/get ") == 0 {
+            playerTag := strings.Replace(message.Text[5:], ":", "", -1)
+
+            chatId := fmt.Sprintf("%d", message.Chat.ID)
+            db.AddPlayerStatsJob(playerTag, chatId)
+
             response := fmt.Sprintf("Stats: ...")
             myBot.Bot.SendMessage(message.Chat, response, nil)
         }else{

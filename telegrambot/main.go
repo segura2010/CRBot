@@ -2,12 +2,10 @@ package main
 
 import (
     "fmt"
-    "encoding/hex"
     "flag"
 
-    "github.com/segura2010/cr-go/client"
-    "github.com/segura2010/cr-go/packets"
-    "github.com/segura2010/cr-go/utils"
+    "CRBot/telegrambot/bot"
+    "CRBot/config"
 )
 
 /* Update version number on each release:
@@ -31,8 +29,22 @@ func main(){
     cfgFile := flag.String("c", "./config.json", "Config file")
     version := flag.Bool("v", false, "Show current CRBot version")
 
+    flag.Parse()
+
     if *version{
         showVersionInfo()
+    }
+
+    config.CreateInstance(*cfgFile)
+
+    instance := bot.CreateInstance(config.GetInstance().TelegramBot.Token)
+    if instance == nil{
+        panic("Unable to create TelegramBot")
+    }
+
+    fmt.Printf("\nListenning for messages...")
+    for{
+        // listen for messages...
     }
 
 }

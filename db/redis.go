@@ -1,11 +1,9 @@
-package dnscache
+package db
 
 import (
-	"time"
-
     "github.com/go-redis/redis"
 
-    "GoHole/config"
+    "CRBot/config"
 )
 
 var instance *redis.Client = nil
@@ -30,3 +28,20 @@ func GetInstance() *redis.Client {
     return instance
 }
 
+func addJob(key, value string) (error){
+	err := GetInstance().RPush(key, value).Err()
+	return err
+}
+
+func popJob(key string) (string){
+	return GetInstance().LPop(key).Val()
+}
+
+func AddPlayerStatsJob(playertag, chatid string) (error){
+	value := playertag + ":" + chatid
+	return addJob("stats", value)
+}
+
+func RemovePlayerStatsJob() (string){
+	return popJob("stats")
+}
