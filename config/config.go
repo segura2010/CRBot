@@ -33,6 +33,7 @@ type TelegramConfig struct {
 type CRConfig struct {
     PassToken string
     PlayerTag string
+    ServerKey string
 }
 
 var instance *MyConfig = nil
@@ -55,6 +56,7 @@ func CreateInstance(filename string) *MyConfig {
             CRBot: CRConfig{
                 PassToken: "",
                 PlayerTag: "",
+                ServerKey: "",
             },
         }
     }

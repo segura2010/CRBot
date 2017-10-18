@@ -45,3 +45,11 @@ func AddPlayerStatsJob(playertag, chatid string) (error){
 func RemovePlayerStatsJob() (string){
 	return popJob("stats")
 }
+
+func SubscribeToPlayerStats() (*redis.PubSub){
+	return GetInstance().PSubscribe("stats")
+}
+
+func PublishToPlayerStats(msg string) (error){
+	return GetInstance().Publish("stats", msg).Err()
+}
