@@ -3,6 +3,7 @@ package main
 import (
     "fmt"
     "flag"
+    "time"
 
     "CRBot/telegrambot/bot"
     "CRBot/config"
@@ -45,6 +46,7 @@ func main(){
     fmt.Printf("\nListenning for messages...")
     for{
         // listen for messages...
+        time.Sleep(time.Duration(1) * time.Second)
     }
 
 }
