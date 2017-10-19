@@ -53,3 +53,15 @@ func SubscribeToPlayerStats() (*redis.PubSub){
 func PublishToPlayerStats(msg string) (error){
 	return GetInstance().Publish("stats", msg).Err()
 }
+
+func AddPlayerTag(playertag, telegramid string) (error){
+	return GetInstance().Set(telegramid, playertag, 0).Err()
+}
+
+func DeletePlayerTag(telegramid string) (error){
+	return GetInstance().Del(telegramid).Err()
+}
+
+func GetPlayerTag(telegramid string) (string){
+	return GetInstance().Get(telegramid).Val()
+}
