@@ -4,7 +4,7 @@ import (
     "fmt"
     "flag"
     "time"
-    "log"
+    //"log"
     "strings"
 
     "CRBot/db"
@@ -44,12 +44,15 @@ func main(){
     for{
         job := db.RemovePlayerStatsJob()
         jobInfo := strings.Split(job, ":")
-        log.Printf("playerTag: %s", jobInfo[0])
+        // log.Printf("playerTag: %s", jobInfo[0])
         if jobInfo[0] != ""{
             visitHomePkt, err := bot.GetStatsForPlayer(jobInfo[0])
             if err == nil{
                 // log.Printf("Payload: %x", visitHomePkt.DecryptedPayload)
                 msg := fmt.Sprintf("%s:%x", job, visitHomePkt.DecryptedPayload)
+                db.PublishToPlayerStats(msg)
+            }else{
+                msg := fmt.Sprintf("%s:err", job)
                 db.PublishToPlayerStats(msg)
             }
         }
