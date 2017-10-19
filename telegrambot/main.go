@@ -4,6 +4,7 @@ import (
     "fmt"
     "flag"
     "time"
+    "log"
 
     "CRBot/telegrambot/bot"
     "CRBot/config"
@@ -43,7 +44,7 @@ func main(){
         panic("Unable to create TelegramBot")
     }
 
-    fmt.Printf("\nListenning for messages...")
+    log.Printf("Listenning for messages...")
     for{
         // listen for messages...
         time.Sleep(time.Duration(1) * time.Second)

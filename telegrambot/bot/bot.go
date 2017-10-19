@@ -5,7 +5,7 @@ import (
     "time"
     "fmt"
     "strings"
-    "log"
+    //"log"
     "strconv"
     "encoding/hex"
     
@@ -60,39 +60,78 @@ func listenMessages(){
     myBot.Bot.Listen(messages, 1*time.Second)
 
     for message := range messages {
-        log.Printf("Received message..")
-        //userID := fmt.Sprintf("%d", message.Sender.ID)
-        
+        // log.Printf("Received message..")
+        userId := fmt.Sprintf("%d", message.Sender.ID)
+        chatId := fmt.Sprintf("%d", message.Chat.ID)
+
         if strings.Index(message.Text, "/get ") == 0 {
-            playerTag := strings.Replace(message.Text[5:], ":", "", -1)
-
-            chatId := fmt.Sprintf("%d", message.Chat.ID)
+            playerTag := clearTag(message.Text[5:])
             db.AddPlayerStatsJob(playerTag, chatId)
-
-            response := fmt.Sprintf("Stats: ...")
-            myBot.Bot.SendMessage(message.Chat, response, nil)
+            myBot.Bot.SendMessage(message.Chat, "Retrieving stats...", nil)
+        }else if strings.Index(message.Text, "/save ") == 0 {
+            playerTag := clearTag(message.Text[6:])
+            err := db.AddPlayerTag(playerTag, userId)
+            if err != nil{
+                myBot.Bot.SendMessage(message.Chat, "There was an error saving your user tag :(", nil)
+                continue
+            }
+            myBot.Bot.SendMessage(message.Chat, "Your player tag was saved!", nil)
+        }else if strings.Index(message.Text, "/delete") == 0 {
+            err := db.DeletePlayerTag(userId)
+            if err != nil{
+                myBot.Bot.SendMessage(message.Chat, "There was an error deleting your user tag :(", nil)
+                continue
+            }
+            myBot.Bot.SendMessage(message.Chat, "Your player tag was deleted!", nil)
+        }else if strings.Index(message.Text, "/me") == 0 {
+            playerTag := db.GetPlayerTag(userId)
+            if playerTag == ""{
+                myBot.Bot.SendMessage(message.Chat, "There was an error retrieving your user tag :(", nil)
+                continue
+            }
+            db.AddPlayerStatsJob(playerTag, chatId)
+            myBot.Bot.SendMessage(message.Chat, "Retrieving stats...", nil)
         }else{
             // help..
-            r := fmt.Sprintf("Available commands:\n/get PLAYER_TAG")
+            r := fmt.Sprintf("Available commands:\n\t/get PLAYER_TAG : get stats for the specified player")
+            r += fmt.Sprintf("\n\t/save PLAYER_TAG : saves your player tag")
+            r += fmt.Sprintf("\n\t/delete : delete your saved player tag")
+            r += fmt.Sprintf("\n\t/me : get your tag (based on the saved tag)")
             myBot.Bot.SendMessage(message.Chat, r, nil)
         }
     }
 }
 
+func clearTag(tag string) (string){
+    tag = strings.Replace(tag, ":", "", -1)
+    tag = strings.Replace(tag, " ", "", -1)
+    tag = strings.Replace(tag, "#", "", -1)
+    tag = strings.ToUpper(tag)
+
+    return tag
+}
+
 func formatUserStats(playerInfo packets.ServerVisitHome) (string){
     var result string
+    winsPlusLosses := float32(playerInfo.Wins + playerInfo.Losses)
+
     result = fmt.Sprintf("*%s* 🏆%d (Record: %d)", playerInfo.Username, playerInfo.Trophies, playerInfo.Stats.RecordTrophies)
-    result += fmt.Sprintf("\n*Clan*: %s", playerInfo.Clan.Name)
+    
+    if playerInfo.HasClan{
+        result += fmt.Sprintf("\n🛡 %s", playerInfo.Clan.Name)
+    }
+    
     result += fmt.Sprintf("\n*Level*: %d | *Cards Found*: %d", playerInfo.Level, playerInfo.Stats.UnlockedCards)
-    result += fmt.Sprintf("\n*Gold*: %d | *Gems*: %d", playerInfo.Gold, playerInfo.Gems)
-    result += fmt.Sprintf("\n*Wins*: %d | *Losses*: %d | *Games*: %d", playerInfo.Wins, playerInfo.Losses, playerInfo.Games)
-    result += fmt.Sprintf("\n*3 Crowns Wins*: %d | *Donations*: %d", playerInfo.Stats.CrownWins3, playerInfo.Stats.Donations)
-    result += fmt.Sprintf("\n*Challenge Cards Won*: %d | *Challenge Max Wins*: %d", playerInfo.Stats.ChallengeMaxWins, playerInfo.Stats.ChallengeCardsWon)
+    result += fmt.Sprintf("\n💰 %d | 💎 %d", playerInfo.Gold, playerInfo.Gems)
+    result += fmt.Sprintf("\n*Wins*: %d | *Losses*: %d", playerInfo.Wins, playerInfo.Losses)
+    result += fmt.Sprintf("\n*Win Rate* %.2f%% | *Games*: %d", (float32(playerInfo.Wins) / winsPlusLosses)*100.0, playerInfo.Games )
+    result += fmt.Sprintf("\n*3 👑 Wins*: %d | *Donations*: %d", playerInfo.Stats.CrownWins3, playerInfo.Stats.Donations)
+    result += fmt.Sprintf("\n*Challenge Cards Won*: %d | *Challenge Max Wins*: %d", playerInfo.Stats.ChallengeCardsWon, playerInfo.Stats.ChallengeMaxWins)
     result += fmt.Sprintf("\n*Tournament Games*: %d", playerInfo.TournamentGames)
     result += fmt.Sprintf("\n--- Chests ---")
     result += fmt.Sprintf("\nNext *SuperMagical* in *%d* wins", (playerInfo.ChestCycle.SuperMagicalPos-playerInfo.ChestCycle.CurrentPosition))
     result += fmt.Sprintf("\nNext *Legendary* in *%d* wins", (playerInfo.ChestCycle.LegendaryPos-playerInfo.ChestCycle.CurrentPosition))
-    //result += fmt.Sprintf("\nNext *Epic* in *%d* days", (playerInfo.ChestCycle.MagicalPos-playerInfo.ChestCycle.CurrentPosition))
+    result += fmt.Sprintf("\nNext *Epic* in *%d* wins", (playerInfo.ChestCycle.EpicPos-playerInfo.ChestCycle.CurrentPosition))
     result += fmt.Sprintf("\n--- Shop ---")
     result += fmt.Sprintf("\nNext *Legendary* in *%d* days", (playerInfo.ShopOffers.Legendary-playerInfo.ShopOffers.CurrentDay))
     result += fmt.Sprintf("\nNext *Epic* in *%d* days", (playerInfo.ShopOffers.Epic-playerInfo.ShopOffers.CurrentDay))
@@ -109,16 +148,24 @@ func listenStats(){
 
     for message := range messages {
         jobInfo := strings.Split(message.Payload, ":")
+
+        chatId, err := strconv.ParseInt(jobInfo[1], 10, 64)
+        if err != nil{
+            continue
+        }
+
+        if jobInfo[2] == "err"{
+            SendMessage(chatId, "There was an error retreiving the stats for that player :(", nil)
+            continue
+        }
+
         tobytes, err := hex.DecodeString(jobInfo[2])
         if err != nil{
             continue
         }
         playerInfo := packets.NewServerVisitHomeFromBytes(tobytes)
-        //log.Printf("Received stats.. %v", playerInfo)
-        chatId, err := strconv.ParseInt(jobInfo[1], 10, 64)
-        if err != nil{
-            continue
-        }
+        // log.Printf("Received stats.. %v", playerInfo)
+        
         msg := formatUserStats(playerInfo)
         sendOptions := telebot.SendOptions{
             ParseMode: "Markdown",
