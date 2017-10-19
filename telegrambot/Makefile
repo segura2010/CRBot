@@ -7,7 +7,7 @@ default: linux
 
 install:
 	@go install ${LDFLAGS}
-	@mv ${GOPATH}/bin/CRBot ${GOPATH}/bin/crtgbot
+	@mv ${GOPATH}/bin/telegrambot ${GOPATH}/bin/crtgbot
 	@echo "Binary on ${GOPATH}/bin/crtgbot"
 
 clean:
