@@ -12,6 +12,7 @@ import (
     "github.com/tucnak/telebot"
 
     "github.com/segura2010/cr-go/packets"
+    "github.com/segura2010/cr-go/resources"
 
     "CRBot/db"
 )
@@ -111,6 +112,42 @@ func clearTag(tag string) (string){
     return tag
 }
 
+func formatChestsOrder(playerInfo packets.ServerVisitHome)(string){
+    result := fmt.Sprintf("*Next chests*:\n|")
+
+    for i:=0;i<8;i++{
+        chestPos := (playerInfo.ChestCycle.CurrentPosition + int32(i)) % int32(len(resources.ChestOrder))
+        chest := resources.ChestOrder[chestPos]
+        result += fmt.Sprintf("%s|", chest)
+    }
+
+    // get next Giant and Magic chest
+    i := 0
+    magicPos := int32(-1)
+    giantPos := int32(-1)
+    for{
+        chestPos := (playerInfo.ChestCycle.CurrentPosition + int32(i)) % int32(len(resources.ChestOrder))
+        chest := resources.ChestOrder[chestPos]
+        
+        if chest == "Magic"{
+            magicPos = (playerInfo.ChestCycle.CurrentPosition + int32(i)) - playerInfo.ChestCycle.CurrentPosition
+        }else if chest == "Giant"{
+            giantPos = (playerInfo.ChestCycle.CurrentPosition + int32(i)) - playerInfo.ChestCycle.CurrentPosition
+        }
+
+        if magicPos > -1 && giantPos > -1{
+            break
+        }
+
+        i += 1
+    }
+
+    result += fmt.Sprintf("\nNext *Magical* in *%d* wins", magicPos)
+    result += fmt.Sprintf("\nNext *Giant* in *%d* wins", giantPos)
+
+    return result
+}
+
 func formatUserStats(playerInfo packets.ServerVisitHome) (string){
     var result string
     winsPlusLosses := float32(playerInfo.Wins + playerInfo.Losses)
@@ -125,10 +162,11 @@ func formatUserStats(playerInfo packets.ServerVisitHome) (string){
     result += fmt.Sprintf("\n💰 %d | 💎 %d", playerInfo.Gold, playerInfo.Gems)
     result += fmt.Sprintf("\n*Wins*: %d | *Losses*: %d", playerInfo.Wins, playerInfo.Losses)
     result += fmt.Sprintf("\n*Win Rate* %.2f%% | *Games*: %d", (float32(playerInfo.Wins) / winsPlusLosses)*100.0, playerInfo.Games )
-    result += fmt.Sprintf("\n*3 👑 Wins*: %d | *Donations*: %d", playerInfo.Stats.CrownWins3, playerInfo.Stats.Donations)
+    result += fmt.Sprintf("\n*3 👑 Wins*: %d (%.2f%%) | *Donations*: %d", playerInfo.Stats.CrownWins3, (float32(playerInfo.Stats.CrownWins3) / float32(playerInfo.Wins))*100.0, playerInfo.Stats.Donations)
     result += fmt.Sprintf("\n*Challenge Cards Won*: %d | *Challenge Max Wins*: %d", playerInfo.Stats.ChallengeCardsWon, playerInfo.Stats.ChallengeMaxWins)
     result += fmt.Sprintf("\n*Tournament Games*: %d", playerInfo.TournamentGames)
     result += fmt.Sprintf("\n--- Chests ---")
+    result += fmt.Sprintf("\n%s", formatChestsOrder(playerInfo))
     result += fmt.Sprintf("\nNext *SuperMagical* in *%d* wins", (playerInfo.ChestCycle.SuperMagicalPos-playerInfo.ChestCycle.CurrentPosition))
     result += fmt.Sprintf("\nNext *Legendary* in *%d* wins", (playerInfo.ChestCycle.LegendaryPos-playerInfo.ChestCycle.CurrentPosition))
     result += fmt.Sprintf("\nNext *Epic* in *%d* wins", (playerInfo.ChestCycle.EpicPos-playerInfo.ChestCycle.CurrentPosition))
