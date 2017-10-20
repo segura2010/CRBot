@@ -96,7 +96,7 @@ func listenMessages(){
             r := fmt.Sprintf("Available commands:\n\t/get PLAYER_TAG : get stats for the specified player")
             r += fmt.Sprintf("\n\t/save PLAYER_TAG : saves your player tag")
             r += fmt.Sprintf("\n\t/delete : delete your saved player tag")
-            r += fmt.Sprintf("\n\t/me : get your tag (based on the saved tag)")
+            r += fmt.Sprintf("\n\t/me : get your stats (based on the saved tag)")
             myBot.Bot.SendMessage(message.Chat, r, nil)
         }
     }
