@@ -7,7 +7,6 @@ default: linux
 
 install:
 	@go install ${LDFLAGS}
-	@mv ${GOPATH}/bin/crbot ${GOPATH}/bin/crbot
 	@echo "Binary on ${GOPATH}/bin/crbot"
 
 clean:
