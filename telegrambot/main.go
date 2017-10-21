@@ -35,6 +35,7 @@ func main(){
 
     if *version{
         showVersionInfo()
+        return
     }
 
     config.CreateInstance(*cfgFile)
