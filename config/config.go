@@ -34,6 +34,7 @@ type CRConfig struct {
     PassToken string
     PlayerTag string
     ServerKey string
+    ContentHash string
 }
 
 var instance *MyConfig = nil

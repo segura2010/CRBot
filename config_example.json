@@ -12,6 +12,7 @@
 	"CRBot":{
 		"PassToken": "",
 		"PlayerTag": "",
-		"ServerKey": ""
+		"ServerKey": "",
+		"ContentHash": "ef03fb447c37ab36dfd03095339f657c4a95de32"
 	}
 }

@@ -30,6 +30,7 @@ func GetStatsForPlayer(tag string) (packets.Packet, error){
     }
 
     helloPayload := packets.NewDefaultClientHello()
+    helloPayload.ContentHash = config.GetInstance().CRBot.ContentHash
     helloPkt := packets.Packet{
         Type: packets.MessageType["ClientHello"],
         Version: 0,
@@ -41,6 +42,7 @@ func GetStatsForPlayer(tag string) (packets.Packet, error){
     loginPayload.Hi = HiLo[0]
     loginPayload.Lo = HiLo[1]
     loginPayload.PassToken = config.GetInstance().CRBot.PassToken
+    loginPayload.ContentHash = config.GetInstance().CRBot.ContentHash
 
     loginPkt := packets.Packet{
         Type: packets.MessageType["ClientLogin"],
