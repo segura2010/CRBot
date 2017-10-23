@@ -82,8 +82,9 @@ func listenMessages(){
                     myBot.Bot.SendMessage(message.Chat, "There was an error saving your user tag :(", nil)
                     continue
                 }
-            }else{
                 myBot.Bot.SendMessage(message.Chat, "Your player tag was saved!", nil)
+            }else{
+                myBot.Bot.SendMessage(message.Chat, "Invalid player tag", nil)
             }
         }else if strings.Index(message.Text, "/delete") == 0 {
             err := db.DeletePlayerTag(userId)
