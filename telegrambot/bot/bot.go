@@ -13,6 +13,7 @@ import (
 
     "github.com/segura2010/cr-go/packets"
     "github.com/segura2010/cr-go/resources"
+    "github.com/segura2010/cr-go/utils"
 
     "CRBot/db"
 )
@@ -67,16 +68,23 @@ func listenMessages(){
 
         if strings.Index(message.Text, "/get ") == 0 {
             playerTag := clearTag(message.Text[5:])
-            db.AddPlayerStatsJob(playerTag, chatId)
-            myBot.Bot.SendMessage(message.Chat, "Retrieving stats...", nil)
+            if utils.IsValidTag(playerTag){
+                db.AddPlayerStatsJob(playerTag, chatId)
+                myBot.Bot.SendMessage(message.Chat, "Retrieving stats...", nil)
+            }else{
+                myBot.Bot.SendMessage(message.Chat, "Invalid player tag", nil)
+            }
         }else if strings.Index(message.Text, "/save ") == 0 {
             playerTag := clearTag(message.Text[6:])
-            err := db.AddPlayerTag(playerTag, userId)
-            if err != nil{
-                myBot.Bot.SendMessage(message.Chat, "There was an error saving your user tag :(", nil)
-                continue
+            if utils.IsValidTag(playerTag){
+                err := db.AddPlayerTag(playerTag, userId)
+                if err != nil{
+                    myBot.Bot.SendMessage(message.Chat, "There was an error saving your user tag :(", nil)
+                    continue
+                }
+            }else{
+                myBot.Bot.SendMessage(message.Chat, "Your player tag was saved!", nil)
             }
-            myBot.Bot.SendMessage(message.Chat, "Your player tag was saved!", nil)
         }else if strings.Index(message.Text, "/delete") == 0 {
             err := db.DeletePlayerTag(userId)
             if err != nil{
