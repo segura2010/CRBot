@@ -61,14 +61,12 @@ func GetStatsForPlayer(tag string) (packets.Packet, error){
     c.SendPacket(helloPkt)
     basicPkt = c.RecvPacket() // receive hello response
     if basicPkt.Type == packets.MessageType["ServerLoginFailed"]{
-        log.Printf("ServerLoginFailed")
         return packets.Packet{}, errors.New("ServerLoginFailed on Hello")
     }
 
     c.SendPacket(loginPkt)
     basicPkt = c.RecvPacket() // receive login response
     if basicPkt.Type == packets.MessageType["ServerLoginFailed"]{
-        log.Printf("ServerLoginFailed")
         return packets.Packet{}, errors.New("ServerLoginFailed on Login")
     }
     //loginOk := packets.NewServerLoginOkFromBytes(basicPkt.DecryptedPayload)
