@@ -4,7 +4,7 @@ import (
     "fmt"
     "flag"
     "time"
-    //"log"
+    "log"
     "strings"
 
     "CRBot/db"
@@ -53,6 +53,7 @@ func main(){
                 msg := fmt.Sprintf("%s:%x", job, visitHomePkt.DecryptedPayload)
                 db.PublishToPlayerStats(msg)
             }else{
+                log.Printf("ERROR: %s", err)
                 msg := fmt.Sprintf("%s:err", job)
                 db.PublishToPlayerStats(msg)
             }
