@@ -138,9 +138,9 @@ func formatChestsOrder(playerInfo packets.ServerVisitHome)(string){
         chestPos := (playerInfo.ChestCycle.CurrentPosition + int32(i)) % int32(len(resources.ChestOrder))
         chest := resources.ChestOrder[chestPos]
         
-        if chest == "Magic"{
+        if chest == "Magic" && magicPos < 0{
             magicPos = (playerInfo.ChestCycle.CurrentPosition + int32(i)) - playerInfo.ChestCycle.CurrentPosition
-        }else if chest == "Giant"{
+        }else if chest == "Giant" && giantPos < 0{
             giantPos = (playerInfo.ChestCycle.CurrentPosition + int32(i)) - playerInfo.ChestCycle.CurrentPosition
         }
 
@@ -151,8 +151,8 @@ func formatChestsOrder(playerInfo packets.ServerVisitHome)(string){
         i += 1
     }
 
-    result += fmt.Sprintf("\nNext *Magical* in *%d* wins", magicPos)
-    result += fmt.Sprintf("\nNext *Giant* in *%d* wins", giantPos)
+    result += fmt.Sprintf("\nNext *Magical* in *%d* wins", magicPos+1)
+    result += fmt.Sprintf("\nNext *Giant* in *%d* wins", giantPos+1)
 
     return result
 }
@@ -176,9 +176,9 @@ func formatUserStats(playerInfo packets.ServerVisitHome) (string){
     result += fmt.Sprintf("\n*Tournament Games*: %d", playerInfo.TournamentGames)
     result += fmt.Sprintf("\n--- Chests ---")
     result += fmt.Sprintf("\n%s", formatChestsOrder(playerInfo))
-    result += fmt.Sprintf("\nNext *SuperMagical* in *%d* wins", (playerInfo.ChestCycle.SuperMagicalPos-playerInfo.ChestCycle.CurrentPosition))
-    result += fmt.Sprintf("\nNext *Legendary* in *%d* wins", (playerInfo.ChestCycle.LegendaryPos-playerInfo.ChestCycle.CurrentPosition))
-    result += fmt.Sprintf("\nNext *Epic* in *%d* wins", (playerInfo.ChestCycle.EpicPos-playerInfo.ChestCycle.CurrentPosition))
+    result += fmt.Sprintf("\nNext *SuperMagical* in *%d* wins", (playerInfo.ChestCycle.SuperMagicalPos-playerInfo.ChestCycle.CurrentPosition)+1)
+    result += fmt.Sprintf("\nNext *Legendary* in *%d* wins", (playerInfo.ChestCycle.LegendaryPos-playerInfo.ChestCycle.CurrentPosition)+1)
+    result += fmt.Sprintf("\nNext *Epic* in *%d* wins", (playerInfo.ChestCycle.EpicPos-playerInfo.ChestCycle.CurrentPosition)+1)
     result += fmt.Sprintf("\n--- Shop ---")
     result += fmt.Sprintf("\nNext *Legendary* in *%d* days", (playerInfo.ShopOffers.Legendary-playerInfo.ShopOffers.CurrentDay))
     result += fmt.Sprintf("\nNext *Epic* in *%d* days", (playerInfo.ShopOffers.Epic-playerInfo.ShopOffers.CurrentDay))
