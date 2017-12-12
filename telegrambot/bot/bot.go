@@ -171,19 +171,36 @@ func formatUserStats(playerInfo packets.ServerVisitHome) (string){
     result += fmt.Sprintf("\n💰 %d | 💎 %d", playerInfo.Gold, playerInfo.Gems)
     result += fmt.Sprintf("\n*Wins*: %d | *Losses*: %d", playerInfo.Wins, playerInfo.Losses)
     result += fmt.Sprintf("\n*Win Rate* %.2f%% | *Games*: %d", (float32(playerInfo.Wins) / winsPlusLosses)*100.0, playerInfo.Games )
-    result += fmt.Sprintf("\n*3 👑 Wins*: %d (%.2f%%) | *Donations*: %d", playerInfo.Stats.CrownWins3, (float32(playerInfo.Stats.CrownWins3) / float32(playerInfo.Wins))*100.0, playerInfo.Stats.Donations)
+    result += fmt.Sprintf("\n*3 👑 Wins*: %d | *Donations*: %d", playerInfo.Stats.CrownWins3, playerInfo.Stats.Donations)
     result += fmt.Sprintf("\n*Challenge Cards Won*: %d | *Challenge Max Wins*: %d", playerInfo.Stats.ChallengeCardsWon, playerInfo.Stats.ChallengeMaxWins)
     result += fmt.Sprintf("\n*Tournament Games*: %d", playerInfo.TournamentGames)
-    result += fmt.Sprintf("\n--- Chests ---")
+    result += fmt.Sprintf("\n--- *Chests* ---")
     result += fmt.Sprintf("\n%s", formatChestsOrder(playerInfo))
     result += fmt.Sprintf("\nNext *SuperMagical* in *%d* wins", (playerInfo.ChestCycle.SuperMagicalPos-playerInfo.ChestCycle.CurrentPosition)+1)
     result += fmt.Sprintf("\nNext *Legendary* in *%d* wins", (playerInfo.ChestCycle.LegendaryPos-playerInfo.ChestCycle.CurrentPosition)+1)
     result += fmt.Sprintf("\nNext *Epic* in *%d* wins", (playerInfo.ChestCycle.EpicPos-playerInfo.ChestCycle.CurrentPosition)+1)
-    result += fmt.Sprintf("\n--- Shop ---")
+    result += fmt.Sprintf("\n--- *Shop* ---")
     result += fmt.Sprintf("\nNext *Legendary* in *%d* days", (playerInfo.ShopOffers.Legendary-playerInfo.ShopOffers.CurrentDay))
     result += fmt.Sprintf("\nNext *Epic* in *%d* days", (playerInfo.ShopOffers.Epic-playerInfo.ShopOffers.CurrentDay))
     result += fmt.Sprintf("\nNext *Arena* in *%d* days", (playerInfo.ShopOffers.Arena-playerInfo.ShopOffers.CurrentDay))
 
+    return result
+}
+
+func formatUserDeck(playerInfo packets.ServerVisitHome) (string){
+    var result string
+
+    result = "--- *Deck* ---"
+    deckLink := "https://link.clashroyale.com/deck/en?deck="
+    
+    for _, card := range playerInfo.Deck{
+        cardName := resources.CardName[resources.CardScid[strconv.Itoa(int(card.Id))]]
+        result += fmt.Sprintf("\n*%s* (Level %d)", cardName, card.Level+1)
+        deckLink += resources.CardScid[strconv.Itoa(int(card.Id))] + ";"
+    }
+
+    result += fmt.Sprintf("\n\n[Copy deck](%s)", deckLink)
+    
     return result
 }
 
@@ -214,10 +231,12 @@ func listenStats(){
         // log.Printf("Received stats.. %v", playerInfo)
         
         msg := formatUserStats(playerInfo)
+        deckMsg := formatUserDeck(playerInfo)
         sendOptions := telebot.SendOptions{
             ParseMode: "Markdown",
         }
         SendMessage(chatId, msg, &sendOptions)
+        SendMessage(chatId, deckMsg, &sendOptions)
     }
 }
 
