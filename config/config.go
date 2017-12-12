@@ -15,6 +15,8 @@ type MyConfig struct {
     TelegramBot TelegramConfig
     // CRBot Info
     CRBot CRConfig
+    // Maintenance Info
+    Maintenance MaintenanceConfig
 }
 
 // DB Config
@@ -35,6 +37,12 @@ type CRConfig struct {
     PlayerTag string
     ServerKey string
     ContentHash string
+}
+
+// Maintenance Mode Config
+type MaintenanceConfig struct {
+    Enabled bool
+    Description string
 }
 
 var instance *MyConfig = nil
@@ -58,6 +66,10 @@ func CreateInstance(filename string) *MyConfig {
                 PassToken: "",
                 PlayerTag: "",
                 ServerKey: "",
+            },
+            Maintenance: MaintenanceConfig{
+                Enabled: false,
+                Description: "",
             },
         }
     }

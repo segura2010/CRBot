@@ -14,5 +14,10 @@
 		"PlayerTag": "",
 		"ServerKey": "",
 		"ContentHash": "ef03fb447c37ab36dfd03095339f657c4a95de32"
+	},
+
+	"Maintenance":{
+		"Enabled": false,
+		"Description": "🤖 I am currently down for maintenance. Please, try again later."
 	}
 }

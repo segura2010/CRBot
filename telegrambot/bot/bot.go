@@ -16,6 +16,7 @@ import (
     "github.com/segura2010/cr-go/utils"
 
     "CRBot/db"
+    "CRBot/config"
 )
 
 type TelegramBot struct{
@@ -61,12 +62,16 @@ func listenMessages(){
     messages := make(chan telebot.Message)
     myBot.Bot.Listen(messages, 1*time.Second)
 
+    cfg := config.GetInstance()
+
     for message := range messages {
         // log.Printf("Received message..")
         userId := fmt.Sprintf("%d", message.Sender.ID)
         chatId := fmt.Sprintf("%d", message.Chat.ID)
 
-        if strings.Index(message.Text, "/get ") == 0 {
+        if cfg.Maintenance.Enabled {
+            myBot.Bot.SendMessage(message.Chat, cfg.Maintenance.Description, nil)
+        }else if strings.Index(message.Text, "/get ") == 0 {
             playerTag := clearTag(message.Text[5:])
             if utils.IsValidTag(playerTag){
                 db.AddPlayerStatsJob(playerTag, chatId)
